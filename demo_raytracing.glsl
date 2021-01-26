@@ -199,9 +199,7 @@ bool scatter(inout Ray ray, HitRecord rec) {
 
 #define MAX_DEPTH 4
 
-vec3 paint(Ray ray, float t_min, float t_max) {
-    HitRecord
- rec;
+vec3 shootRay(Ray ray, float t_min, float t_max) {
 
     int hitCounts = 0;
     bool isHit = intersectWorld(ray, t_min, t_max, rec);
@@ -273,7 +271,7 @@ void mainImage( out vec4 frag_color, in vec2 frag_coord )
 
     Ray ray = getRay(camera, u, v);
 
-    color = paint(ray, 0.01, 1000.0);
+    color = shootRay(ray, 0.01, 1000.0);
 
     if (texelFetch(iChannel0, ivec2(0),0).xy == iResolution.xy) {        
         frag_color = vec4(color,1) + texelFetch(iChannel0, ivec2(frag_coord), 0);
