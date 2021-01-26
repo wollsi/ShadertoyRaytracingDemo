@@ -200,6 +200,7 @@ bool scatter(inout Ray ray, HitRecord rec) {
 #define MAX_DEPTH 4
 
 vec3 shootRay(Ray ray, float t_min, float t_max) {
+    HitRecord rec;
 
     int hitCounts = 0;
     bool isHit = intersectWorld(ray, t_min, t_max, rec);
