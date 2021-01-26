@@ -116,9 +116,9 @@ bool intersect(Ray ray, Sphere s, float t_min, float t_max, out HitRecord rec) {
 Sphere[] spheres = Sphere[6](
     Sphere(vec3(-2.0, 2.0, 1.0), 1.0, Material(GLASS, vec3(0.1, 0.7, 0.1), 0.0, 1.0)),
     Sphere(vec3(-4.0, 1.0, 0.8), 1.0, Material(DIFFUSE, vec3(0.4, 0.2, 0.1), 0.0, 1.0)),
-    Sphere(vec3(1.0, 1.0, 0.0), 1.0, Material(METAL, vec3(1.0, 1.0, 1.0), 0.0, 1.0)),
-    Sphere(vec3(2.0, 2.8, 0.0), 1.0, Material(METAL, vec3(1.0, 1.0, 1.0), 0.0, 1.0)),
-    Sphere(vec3(3.0, 1.0, 0.0), 1.0, Material(METAL, vec3(1.0, 1.0, 1.0), 0.0, 1.0)),
+    Sphere(vec3(1.0, 1.0, 0.0), 1.0, Material(METAL, vec3(0.5, 0.5, 0.5), 0.0, 1.0)),
+    Sphere(vec3(2.0, 2.8, 0.0), 1.0, Material(METAL, vec3(0.5, 0.5, 0.5), 0.0, 1.0)),
+    Sphere(vec3(3.0, 1.0, 0.0), 1.0, Material(METAL, vec3(0.5, 0.5, 0.5), 0.0, 1.0)),
     Sphere(vec3(0.0, -1000.0, 0.0), 1000.0, Material(DIFFUSE, vec3(0.5, 0.5, 0.5), 0.0, 1.0))
 );  
 
