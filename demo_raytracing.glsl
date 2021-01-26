@@ -74,37 +74,37 @@ vec3 random_in_unit_sphere()
     return vec3(x, y, z);
 }
 
-bool intersect(Ray ray, Sphere s, float t_min, float t_max, out HitRecord rec) {
+bool intersect(Ray ray, Sphere sphere, float t_min, float t_max, out HitRecord record) {
 
     vec3 origin = ray.origin;
     vec3 direction = ray.direction;
-    vec3 center = s.center;
+    vec3 center = sphere.center;
     vec3 oc = origin - center;
     float a = dot(direction, direction);
     float b = dot(direction, oc);
-    float c = dot(oc, oc) - s.radius * s.radius;
+    float c = dot(oc, oc) - sphere.radius * sphere.radius;
     float discriminant = b * b - a * c;
 
     bool isHit = false;
-    if (discriminant > 0.0) {
+    if (discriminant >= 0.0) {
 
         float temp = (-b - sqrt(discriminant)) / a;
         if (temp > t_min && temp < t_max) {
             isHit = true;
-            rec.t = temp;
-            rec.p = ray.origin + temp * ray.direction;
-            rec.normal = normalize(rec.p - s.center);
-            rec.material = s.material;
+            record.t = temp;
+            record.p = ray.origin + temp * ray.direction;
+            record.normal = normalize(record.p - sphere.center);
+            record.material = sphere.material;
             return isHit;
         }
 
         temp = (-b + sqrt(discriminant)) / a;
         if (temp > t_min && temp < t_max) {
             isHit = true;          
-            rec.t = temp;
-            rec.p = ray.origin + temp * ray.direction;
-            rec.normal = normalize(rec.p - s.center);
-            rec.material = s.material;
+            record.t = temp;
+            record.p = ray.origin + temp * ray.direction;
+            record.normal = normalize(record.p - sphere.center);
+            record.material = sphere.material;
             return isHit;
         }
     }      
@@ -122,7 +122,7 @@ Sphere[] spheres = Sphere[6](
     Sphere(vec3(0.0, -1000.0, 0.0), 1000.0, Material(DIFFUSE, vec3(0.5, 0.5, 0.5), 0.0, 1.0))
 );  
 
-bool intersectWorld(Ray ray, float t_min, float t_max, out HitRecord rec) {
+bool intersectWorld(Ray ray, float t_min, float t_max, out HitRecord record) {
     bool isHit = false;
 
     for (int i = 0; i < spheres.length(); i++) {
@@ -140,58 +140,58 @@ bool intersectWorld(Ray ray, float t_min, float t_max, out HitRecord rec) {
 }
 
 
-bool scatter(inout Ray ray, HitRecord rec) {
-    int materialType = rec.material.materialType;
+bool scatter(inout Ray ray, HitRecord record) {
+    int materialType = record.material.materialType;
     
     if (materialType == METAL) {
-        vec3 reflected = reflect(ray.direction, rec.normal);
-        float fuzz = rec.material.fuzz > 1.0 ? 1.0 : rec.material.fuzz < 0.0 ? 0.0 : rec.material.fuzz;
+        vec3 reflected = reflect(ray.direction, record.normal);
+        float fuzz = record.material.fuzz > 1.0 ? 1.0 : record.material.fuzz < 0.0 ? 0.0 : record.material.fuzz;
         if (fuzz > 0.0) {
-            ray = Ray(rec.p, normalize(reflected) + fuzz * random_in_unit_sphere());
+            ray = Ray(record.p, normalize(reflected) + fuzz * random_in_unit_sphere());
         } else {
-            ray = Ray(rec.p, reflected);
+            ray = Ray(record.p, reflected);
         }
-        return (dot(ray.direction, rec.normal) > 0.0);
+        return (dot(ray.direction, record.normal) > 0.0);
         
     } else if (materialType == GLASS) {
 
         vec3 outward_normal;
-        vec3 reflected = reflect(ray.direction, rec.normal);
+        vec3 reflected = reflect(ray.direction, record.normal);
         float ni_over_nt;
         float reflected_prob;
         float cosine;
-        float refractionIndex = rec.material.refractionIndex;
+        float refractionIndex = record.material.refractionIndex;
 
-        if (dot(ray.direction, rec.normal) > 0.0) {
-            outward_normal = - rec.normal;
-            ni_over_nt = rec.material.refractionIndex;
-            cosine = refractionIndex * dot(normalize(ray.direction), rec.normal);
+        if (dot(ray.direction, record.normal) > 0.0) {
+            outward_normal = - record.normal;
+            ni_over_nt = record.material.refractionIndex;
+            cosine = refractionIndex * dot(normalize(ray.direction), record.normal);
         } else {
-            outward_normal = rec.normal;
-            ni_over_nt = 1.0 / rec.material.refractionIndex;
-            cosine = -refractionIndex * dot(normalize(ray.direction), rec.normal);
+            outward_normal = record.normal;
+            ni_over_nt = 1.0 / record.material.refractionIndex;
+            cosine = -refractionIndex * dot(normalize(ray.direction), record.normal);
         }
 
         vec3 refracted = refract(normalize(ray.direction), outward_normal, ni_over_nt);
 
         if (refracted.x != 0.0 && refracted.y != 0.0 && refracted.z != 0.0) {
             reflected_prob = schlick(cosine, refractionIndex);
-            // ray = Ray(rec.p, refracted);
+            // ray = Ray(record.p, refracted);
         } else {
             reflected_prob  = 1.0;
-            // ray = Ray(rec.p, reflected);
+            // ray = Ray(record.p, reflected);
         }
 
         if (rand2D() < reflected_prob) {
-            ray = Ray(rec.p, reflected);          
+            ray = Ray(record.p, reflected);          
         } else {
-            ray = Ray(rec.p, refracted);
+            ray = Ray(record.p, refracted);
         }
 
         return true;
 
     } else {
-        ray = Ray(rec.p, rec.normal + random_in_unit_sphere());
+        ray = Ray(record.p, record.normal + random_in_unit_sphere());
         return true;
     }
 }
@@ -199,20 +199,20 @@ bool scatter(inout Ray ray, HitRecord rec) {
 #define MAX_DEPTH 4
 
 vec3 shootRay(Ray ray, float t_min, float t_max) {
-    HitRecord rec;
+    HitRecord record;
 
     int hitCounts = 0;
-    bool isHit = intersectWorld(ray, t_min, t_max, rec);
+    bool isHit = intersectWorld(ray, t_min, t_max, record);
     vec3 scale = vec3(1.0, 1.0, 1.0);
 
     while(isHit && hitCounts < MAX_DEPTH) {
         hitCounts++;
-        bool isScatter = scatter(ray, rec);
+        bool isScatter = scatter(ray, record);
 
         if (!isScatter) return vec3(0.0, 0.0, 0.0);
 
-        scale *= rec.material.albedo;
-        isHit = intersectWorld(ray, t_min, t_max, rec);   
+        scale *= record.material.albedo;
+        isHit = intersectWorld(ray, t_min, t_max, record);   
     }
 
     float t = (normalize(ray.direction).y + 1.0) * 0.5;
