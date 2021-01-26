@@ -8,7 +8,7 @@ struct Material {
     int materialType;
     vec3 albedo; // diffuse reflection (r,g,b)
     float fuzz;
-    float ref_idx;
+    float refractionIndex;
 };
 
 struct HitRecord {
@@ -48,10 +48,10 @@ float rand2D()
  *
  * @param cosine the cosine of the angle between the direction from which the 
  * incident light is coming and the normal of the interface.
- * @param ref_idx refraction index of the interface
+ * @param refractionIndex refraction index of the interface
  */
-float schlick(float cosine, float ref_idx) {
-    float r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
+float schlick(float cosine, float refractionIndex) {
+    float r0 = (1.0 - refractionIndex) / (1.0 + refractionIndex);
     r0 = r0 * r0;
     return r0 + (1.0 - r0) * pow((1.0 - cosine), 5.0);
 }
@@ -161,22 +161,22 @@ bool scatter(inout Ray ray, HitRecord rec) {
         float ni_over_nt;
         float reflected_prob;
         float cosine;
-        float ref_idx = rec.material.ref_idx;
+        float refractionIndex = rec.material.refractionIndex;
 
         if (dot(ray.direction, rec.normal) > 0.0) {
             outward_normal = - rec.normal;
-            ni_over_nt = rec.material.ref_idx;
-            cosine = ref_idx * dot(normalize(ray.direction), rec.normal);
+            ni_over_nt = rec.material.refractionIndex;
+            cosine = refractionIndex * dot(normalize(ray.direction), rec.normal);
         } else {
             outward_normal = rec.normal;
-            ni_over_nt = 1.0 / rec.material.ref_idx;
-            cosine = -ref_idx * dot(normalize(ray.direction), rec.normal);
+            ni_over_nt = 1.0 / rec.material.refractionIndex;
+            cosine = -refractionIndex * dot(normalize(ray.direction), rec.normal);
         }
 
         vec3 refracted = refract(normalize(ray.direction), outward_normal, ni_over_nt);
 
         if (refracted.x != 0.0 && refracted.y != 0.0 && refracted.z != 0.0) {
-            reflected_prob = schlick(cosine, ref_idx);
+            reflected_prob = schlick(cosine, refractionIndex);
             // ray = Ray(rec.p, refracted);
         } else {
             reflected_prob  = 1.0;
