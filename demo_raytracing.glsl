@@ -127,13 +127,12 @@ bool intersectWorld(Ray ray, float t_min, float t_max, out HitRecord rec) {
 
     for (int i = 0; i < spheres.length(); i++) {
         bool isCurrHit = false;
-        HitRecord
-     currRec;
-        isCurrHit = intersect(ray, spheres[i], t_min, t_max, currRec);
+        HitRecord currentRecord;
+        isCurrHit = intersect(ray, spheres[i], t_min, t_max, currentRecord);
         if (isCurrHit) {
             isHit = true;
-            t_max = currRec.t;
-            rec = currRec;
+            t_max = currentRecord.t;
+            record = currentRecord;
         }
     }
 
